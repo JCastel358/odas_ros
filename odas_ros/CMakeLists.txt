@@ -72,6 +72,7 @@ install(PROGRAMS
   scripts/echocancel.sh
   scripts/movesinks.sh
   scripts/setvolume.sh
+  scripts/odas_leak_classifier_node.py
   scripts/odas_echocancel_filter_server_node.py
   scripts/odas_server_node.py
   scripts/odas_visualization_node.py

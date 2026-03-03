@@ -194,13 +194,28 @@ class SstSocketServer(JsonSocketServer):
         super().__init__(node, configuration['sst']['tracked']['interface']['port'])
         self._frame_id = frame_id
         self._sst_pub = self._node.create_publisher(OdasSstArrayStamped, 'sst', SSL_SST_QUEUE_SIZE)
+        # Raw SST keeps ODAS source ordering (including id=0 entries) so downstream
+        # nodes can align source index with separated audio channels.
+        self._sst_raw_pub = self._node.create_publisher(OdasSstArrayStamped, 'sst_raw', SSL_SST_QUEUE_SIZE)
 
     def _handle_data(self, sst: dict):
+        odas_sst_raw_array_stamped_msg = OdasSstArrayStamped()
+        odas_sst_raw_array_stamped_msg.header.stamp = self._node.get_clock().now().to_msg()
+        odas_sst_raw_array_stamped_msg.header.frame_id = self._frame_id
+
         odas_sst_array_stamped_msg = OdasSstArrayStamped()
-        odas_sst_array_stamped_msg.header.stamp = self._node.get_clock().now().to_msg()
+        odas_sst_array_stamped_msg.header.stamp = odas_sst_raw_array_stamped_msg.header.stamp
         odas_sst_array_stamped_msg.header.frame_id = self._frame_id
 
         for source in sst['src']:
+            odas_sst_raw = OdasSst()
+            odas_sst_raw.id = source['id']
+            odas_sst_raw.x = source['x']
+            odas_sst_raw.y = source['y']
+            odas_sst_raw.z = source['z']
+            odas_sst_raw.activity = source['activity']
+            odas_sst_raw_array_stamped_msg.sources.append(odas_sst_raw)
+
             if source['id'] != 0:
                 odas_sst = OdasSst()
                 odas_sst.id = source['id']
@@ -211,6 +226,7 @@ class SstSocketServer(JsonSocketServer):
                 odas_sst_array_stamped_msg.sources.append(odas_sst)
 
         if rclpy.ok():
+            self._sst_raw_pub.publish(odas_sst_raw_array_stamped_msg)
             self._sst_pub.publish(odas_sst_array_stamped_msg)
 
 

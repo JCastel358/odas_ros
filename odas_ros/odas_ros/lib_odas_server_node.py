@@ -287,6 +287,7 @@ class OdasServerNode(rclpy.node.Node):
 
         self._configuration_path = self.declare_parameter('configuration_path', '').get_parameter_value().string_value
         self._configuration = self._load_configuration(self._configuration_path)
+        self._core_log_level = self.declare_parameter('core_log_level', 'warn').get_parameter_value().string_value
         frame_id = self.declare_parameter('frame_id', '').get_parameter_value().string_value
         audio_queue_size = self.declare_parameter('audio_queue_size', 1).get_parameter_value().integer_value
 
@@ -378,7 +379,8 @@ class OdasServerNode(rclpy.node.Node):
                            "launch",
                            "odas_ros",
                            "odas_core_node.launch.xml",
-                           "configuration_path:=" + self._configuration_path]
+                           "configuration_path:=" + self._configuration_path,
+                           "log_level:=" + self._core_log_level]
 
         odas_core_process = subprocess.Popen(executable_args, cwd=os.curdir)
 

@@ -2,7 +2,7 @@
     <arg name="configuration_path" default="$(find-pkg-share odas_ros)/config/configuration.cfg"/>
     <arg name="log_level" default="warn"/>
 
-    <node pkg="odas_ros" exec="odas_core_node" name="odas_core_node" args="--ros-args --log-level $(var log_level)">
+    <node pkg="odas_ros" exec="odas_core_node" name="odas_core_node" args="--ros-args --log-level $(var log_level) --log-level rmw_cyclonedds_cpp:=error">
         <param name="configuration_path" value="$(var configuration_path)"/>
     </node>
 </launch>

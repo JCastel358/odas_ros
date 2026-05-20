@@ -17,13 +17,13 @@
 
   <!-- ODAS -->
   <group>
-    <node unless="$(var use_echo_cancellation)" pkg="odas_ros" exec="odas_server_node.py" name="odas_server_node" args="--ros-args --log-level $(var log_level)">
+    <node unless="$(var use_echo_cancellation)" pkg="odas_ros" exec="odas_server_node.py" name="odas_server_node" args="--ros-args --log-level $(var log_level) --log-level rmw_cyclonedds_cpp:=error">
       <param name="configuration_path" value="$(var configuration_path)"/>
       <param name="frame_id" value="$(var frame_id)"/>
       <param name="audio_queue_size" value="$(var audio_queue_size)"/>
       <param name="core_log_level" value="$(var log_level)"/>
     </node>
-    <node if="$(var use_echo_cancellation)" pkg="odas_ros" exec="odas_echocancel_filter_server_node.py" name="odas_server_node" args="--ros-args --log-level $(var log_level)">
+    <node if="$(var use_echo_cancellation)" pkg="odas_ros" exec="odas_echocancel_filter_server_node.py" name="odas_server_node" args="--ros-args --log-level $(var log_level) --log-level rmw_cyclonedds_cpp:=error">
       <param name="configuration_path" value="$(var configuration_path)"/>
       <param name="frame_id" value="$(var frame_id)"/>
       <param name="audio_queue_size" value="$(var audio_queue_size)"/>
@@ -32,7 +32,7 @@
       <remap from="ec_signal" to="$(var echo_cancelled_signal_topic)"/>
     </node>
 
-    <node if="$(var enable_leak_classifier)" pkg="odas_ros" exec="odas_leak_classifier_node.py" name="odas_leak_classifier_node" args="--ros-args --log-level $(var log_level)">
+    <node if="$(var enable_leak_classifier)" pkg="odas_ros" exec="odas_leak_classifier_node.py" name="odas_leak_classifier_node" args="--ros-args --log-level $(var log_level) --log-level rmw_cyclonedds_cpp:=error">
       <param name="publish_debug_logs" value="$(var leak_classifier_debug)"/>
       <param name="sst_topic" value="sst_raw"/>
       <param name="sss_topic" value="sss"/>
@@ -42,19 +42,19 @@
     </node>
 
     <group if="$(var visualization)">
-      <node pkg="odas_ros" exec="odas_visualization_node.py" name="odas_visualization_node" args="--ros-args --log-level $(var log_level)">
+      <node pkg="odas_ros" exec="odas_visualization_node.py" name="odas_visualization_node" args="--ros-args --log-level $(var log_level) --log-level rmw_cyclonedds_cpp:=error">
         <param name="configuration_path" value="$(var configuration_path)"/>
       </node>
 
       <!-- Position of frame ODAS relative to robot Base_link -->
-      <node if="$(or $(var rviz) $(var force_publish_tf))" pkg="tf2_ros" exec="static_transform_publisher" name="odas_broadcaster" args="0.24 0 0.10 0 0 0 base_link $(var frame_id) --ros-args --log-level $(var log_level)" />
+      <node if="$(or $(var rviz) $(var force_publish_tf))" pkg="tf2_ros" exec="static_transform_publisher" name="odas_broadcaster" args="0.24 0 0.10 0 0 0 base_link $(var frame_id) --ros-args --log-level $(var log_level) --log-level rmw_cyclonedds_cpp:=error" />
 
       <!--Run Rviz-->
-      <node if="$(var rviz)" name="rviz" pkg="rviz2" exec="rviz2" args="-d $(var rviz_cfg) --ros-args --log-level $(var log_level)"/>
+      <node if="$(var rviz)" name="rviz" pkg="rviz2" exec="rviz2" args="-d $(var rviz_cfg) --ros-args --log-level $(var log_level) --log-level rmw_cyclonedds_cpp:=error"/>
     </group>
     <group unless="$(var visualization)">
       <!-- Position of frame ODAS relative to robot Base_link -->
-      <node if="$(var force_publish_tf)" pkg="tf2_ros" exec="static_transform_publisher" name="odas_broadcaster" args="0.24 0 0.10 0 0 0 base_link $(var frame_id) --ros-args --log-level $(var log_level)" />
+      <node if="$(var force_publish_tf)" pkg="tf2_ros" exec="static_transform_publisher" name="odas_broadcaster" args="0.24 0 0.10 0 0 0 base_link $(var frame_id) --ros-args --log-level $(var log_level) --log-level rmw_cyclonedds_cpp:=error" />
     </group>
   </group>
 </launch>

@@ -1,0 +1,53 @@
+# Leak-classifier tuning parameters (odas_leak_classifier_node).
+#
+# Loaded by odas.launch.xml via `<param from="..."/>`. Every value here is the
+# node's built-in default, so loading this file as-is changes NOTHING — edit a
+# value and relaunch to tune. Override the file path with the launch arg
+# `odas_leak_classifier_params_file:=/path/to/your.yaml`.
+#
+# WHY THIS EXISTS: the classifier only sets /leak_detected=true after it LATCHES a
+# leak, which (in strict_mode) requires, for `hold_on` consecutive frames:
+#       hi_lo_ratio_db >= hi_lo_latch   AND   voice_ratio_db <= voice_latch
+# hi_lo_ratio_db = energy(2-8 kHz) / energy(0.2-2 kHz) in dB  -> high for a hiss.
+# voice_ratio_db = energy(0.3-3.4 kHz "voice band") / energy(rest) in dB
+#                  -> the gate REJECTS sounds with too much voice-band energy so the
+#                     operator's speech does not register as a leak. A played-back
+#                     recording / broadband noise often has positive voice_ratio_db
+#                     and will never latch until voice_latch / voice_on are raised.
+# Watch the live `[LEAK=0] ACQUIRE ... hi_lo=.. voice=.. flux=..` logs and set the
+# thresholds just inside the values your source actually produces.
+/**:
+  ros__parameters:
+    # --- gross signal gates (drop quiet / non-directional frames) ---
+    min_activity: 0.40          # ODAS source activity 0..1
+    min_rms: 70.0               # min separated-signal RMS
+    min_dir_eps: 1.0e-6         # min |x|,|y| direction magnitude
+
+    # --- ON thresholds (sustain an already-latched leak) ---
+    hi_lo_on: 3.0               # dB; hi_lo must stay >= this
+    voice_on: -2.0              # dB; voice must stay <= this (strict_mode)
+    voice_relaxed_on: 1.0       # dB; voice <= this when strict_mode=false
+
+    # --- LATCH thresholds (acquire a NEW leak; stricter than ON) ---
+    hi_lo_latch: 8.0            # dB; raise to demand a stronger hiss
+    voice_latch: -5.0           # dB; RAISE (e.g. 0..+6) to accept voice-band-heavy sources
+    strict_mode: true           # false -> use voice_relaxed_on instead of voice_latch/voice_on
+
+    # --- OFF / contested thresholds (drop a latched leak) ---
+    hi_lo_off: 0.0              # dB; hi_lo <= this -> off
+    voice_off: 0.0             # dB; voice >= this -> off
+    contested_voice_max_db: 1.0 # dB; voice in [voice_off, this) -> contested hold
+    max_contested_hold_ticks: 2
+
+    # --- hysteresis / debounce (frames @ ~print_hz) ---
+    hold_on: 3                  # consecutive latch-ok frames needed to fire
+    hold_off: 6                 # consecutive off frames needed to drop
+
+    # --- spectral-flux latch guard (reject transients) ---
+    max_flux_for_latch: 0.10    # block latch if flux > this ...
+    hi_lo_very_strong: 15.0     # ... unless hi_lo >= this (skip flux guard)
+    voice_skip_flux: -8.0       # ... or voice <= this (skip flux guard)
+
+    # --- analysis windows ---
+    window_sec: 0.50
+    median_sec: 1.0

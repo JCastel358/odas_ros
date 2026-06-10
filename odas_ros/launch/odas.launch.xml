@@ -12,6 +12,7 @@
   <arg name="echo_cancelled_signal_topic" default="ec_signal"/>
   <arg name="enable_leak_classifier" default="false"/>
   <arg name="leak_classifier_debug" default="false"/>
+  <arg name="leak_classifier_params_file" default="$(find-pkg-share odas_ros)/config/leak_classifier_params.yaml"/>
   <arg name="doa_zero_offset_deg" default="129.0"/>
   <arg name="log_level" default="warn"/>
 
@@ -33,6 +34,7 @@
     </node>
 
     <node if="$(var enable_leak_classifier)" pkg="odas_ros" exec="odas_leak_classifier_node.py" name="odas_leak_classifier_node" args="--ros-args --log-level $(var log_level) --log-level rmw_cyclonedds_cpp:=error">
+      <param from="$(var leak_classifier_params_file)"/>
       <param name="publish_debug_logs" value="$(var leak_classifier_debug)"/>
       <param name="sst_topic" value="sst_raw"/>
       <param name="sss_topic" value="sss"/>

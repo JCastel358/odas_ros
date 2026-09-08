@@ -13,7 +13,7 @@
   <arg name="enable_leak_classifier" default="false"/>
   <arg name="leak_classifier_debug" default="false"/>
   <arg name="leak_classifier_params_file" default="$(find-pkg-share odas_ros)/config/leak_classifier_params.yaml"/>
-  <arg name="doa_zero_offset_deg" default="129.0"/>
+  <arg name="doa_zero_offset_deg" default="39.0"/>
   <arg name="log_level" default="warn"/>
 
   <!-- ODAS -->
@@ -48,15 +48,19 @@
         <param name="configuration_path" value="$(var configuration_path)"/>
       </node>
 
-      <!-- Position of frame ODAS relative to robot Base_link -->
-      <node if="$(or $(var rviz) $(var force_publish_tf))" pkg="tf2_ros" exec="static_transform_publisher" name="odas_broadcaster" args="0.24 0 0.10 0 0 0 base_link $(var frame_id) --ros-args --log-level $(var log_level) --log-level rmw_cyclonedds_cpp:=error" />
+      <!-- Position of frame ODAS relative to robot Base_link (x y z yaw pitch roll).
+           yaw=3.14159 (180 deg) = array re-mounted flipped from its old orientation.
+           NOTE: this TF is RViz-only; leak bearing is oriented by doa_zero_offset_deg. -->
+      <node if="$(or $(var rviz) $(var force_publish_tf))" pkg="tf2_ros" exec="static_transform_publisher" name="odas_broadcaster" args="0.10 0 0.21 3.14159 0 0 base_link $(var frame_id) --ros-args --log-level $(var log_level) --log-level rmw_cyclonedds_cpp:=error" />
 
       <!--Run Rviz-->
       <node if="$(var rviz)" name="rviz" pkg="rviz2" exec="rviz2" args="-d $(var rviz_cfg) --ros-args --log-level $(var log_level) --log-level rmw_cyclonedds_cpp:=error"/>
     </group>
     <group unless="$(var visualization)">
-      <!-- Position of frame ODAS relative to robot Base_link -->
-      <node if="$(var force_publish_tf)" pkg="tf2_ros" exec="static_transform_publisher" name="odas_broadcaster" args="0.24 0 0.10 0 0 0 base_link $(var frame_id) --ros-args --log-level $(var log_level) --log-level rmw_cyclonedds_cpp:=error" />
+      <!-- Position of frame ODAS relative to robot Base_link (x y z yaw pitch roll).
+           yaw=3.14159 (180 deg) = array re-mounted flipped from its old orientation.
+           NOTE: this TF is RViz-only; leak bearing is oriented by doa_zero_offset_deg. -->
+      <node if="$(var force_publish_tf)" pkg="tf2_ros" exec="static_transform_publisher" name="odas_broadcaster" args="0.10 0 0.21 3.14159 0 0 base_link $(var frame_id) --ros-args --log-level $(var log_level) --log-level rmw_cyclonedds_cpp:=error" />
     </group>
   </group>
 </launch>
